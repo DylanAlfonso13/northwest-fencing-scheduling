@@ -8,30 +8,9 @@ import {
 } from "@heroicons/react/24/solid";
 import { ArrowUpTrayIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-
-interface Contact {
-  firstName: string;
-  lastName: string;
-  fenceLength: string;
-  email: string;
-  phone: string;
-  address1: string;
-  address2?: string;
-  city: string;
-  subdivision?: string;
-  cityType: string;
-  isHOA: string;
-  survey?: File | null;
-  fenceType: string;
-  details?: string;
-}
-
-interface Props {
-  contact: Contact;
-  setContact: (c: Contact) => void;
-  next: () => void;
-  back: () => void;
-}
+import { renderDropdown } from "@/components/ui/renderDropdown";
+import { useContactForm } from "@/hooks/useContactForm";
+import type { Props } from "@/types/props";
 
 export default function ContactInfoStep({
   contact,
@@ -39,102 +18,30 @@ export default function ContactInfoStep({
   next,
   back,
 }: Props) {
+  // hook encapsulates formatters, validation, touched state
+  const {
+    touched,
+    setTouched,
+    emailValid,
+    phoneValid,
+    fenceValid,
+    requiredFilled,
+    handlePhoneChange,
+  } = useContactForm(contact, setContact);
+
+  // UI-only dropdown toggles
   const [openFence, setOpenFence] = useState(false);
   const [openCityType, setOpenCityType] = useState(false);
   const [openIsHOA, setOpenIsHOA] = useState(false);
-  const [emailTouched, setEmailTouched] = useState(false);
-  const [phoneTouched, setPhoneTouched] = useState(false);
 
-  // Validation regex patterns
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email);
-  const phoneDigits = contact.phone.replace(/\D/g, "");
-  const phoneValid = /^\d{10}$/.test(phoneDigits);
-
-  // validate required fields
-  const requiredFilled =
-    contact.firstName &&
-    contact.lastName &&
-    Number(contact.fenceLength) >= 100 &&
-    contact.email &&
-    contact.phone &&
-    contact.address1 &&
-    contact.city &&
-    contact.cityType &&
-    contact.isHOA &&
-    contact.fenceType;
-
+  // dropdown options
   const fenceOptions = ["White Vinyl", "Traditional Cedar", "Black Aluminum"];
   const cityTypeOptions = ["City Limits", "Unincorporated"];
   const hoaOptions = ["Yes", "No"];
 
-  // Phone formatting helper
-  const handlePhoneChange = (value: string) => {
-    let digits = value.replace(/\D/g, "").slice(0, 10);
-    let formatted = digits;
-    if (digits.length >= 7) {
-      formatted = `(${digits.substr(0, 3)})-${digits.substr(
-        3,
-        3
-      )}-${digits.substr(6)}`;
-    } else if (digits.length >= 4) {
-      formatted = `(${digits.substr(0, 3)})-${digits.substr(3)}`;
-    } else if (digits.length > 0) {
-      formatted = `(${digits}`;
-    }
-    setContact({ ...contact, phone: formatted });
-  };
-
-  const renderDropdown = (
-    label: string,
-    value: string,
-    options: string[],
-    open: boolean,
-    toggle: () => void,
-    select: (val: string) => void
-  ) => (
-    <div className="col-span-1 relative">
-      <div
-        className="h-12 flex items-center justify-between px-3 bg-gray-100 border border-gray-200 rounded-lg cursor-pointer"
-        onClick={toggle}
-      >
-        <span
-          className={`text-sm ${value ? "text-gray-800" : "text-gray-500"}`}
-        >
-          {value || label}
-        </span>
-        <ChevronDownIcon className="w-5 h-5 text-gray-500" />
-      </div>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-lg"
-          >
-            {options.map((opt) => (
-              <div
-                key={opt}
-                className={`px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer ${
-                  value === opt ? "bg-gray-100" : ""
-                }`}
-                onClick={() => {
-                  select(opt);
-                  toggle();
-                }}
-              >
-                {opt}
-              </div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-
   return (
     <motion.div
+      // animate-in/out transitions
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -144,8 +51,9 @@ export default function ContactInfoStep({
       <h2 className="text-3xl font-semibold mb-12">
         Enter your contact information
       </h2>
+
       <form className="w-full max-w-4xl grid grid-cols-2 gap-12 mb-24">
-        {/* Use Input for consistency */}
+        {/* Name */}
         <Input
           placeholder="First Name *"
           value={contact.firstName}
@@ -160,8 +68,10 @@ export default function ContactInfoStep({
           onChange={(e) => setContact({ ...contact, lastName: e.target.value })}
           className="col-span-1 h-12 text-sm bg-gray-100 focus:bg-white"
         />
+
+        {/* Fence Length */}
         <Input
-          placeholder="Fence Length (in feet, 100ft minimum) *"
+          placeholder="Fence Length (100ft min) *"
           type="number"
           value={contact.fenceLength}
           onChange={(e) =>
@@ -170,23 +80,24 @@ export default function ContactInfoStep({
           className="col-span-1 h-12 text-sm bg-gray-100 focus:bg-white"
         />
 
+        {/* Email & Phone */}
         <Input
           type="email"
           placeholder="Email *"
           value={contact.email}
           onChange={(e) => setContact({ ...contact, email: e.target.value })}
-          onBlur={() => setEmailTouched(true)}
+          onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
           className="col-span-1 h-12 text-sm bg-gray-100 focus:bg-white"
         />
-
         <Input
           placeholder="Phone Number *"
           value={contact.phone}
           onChange={(e) => handlePhoneChange(e.target.value)}
-          onBlur={() => setPhoneTouched(true)}
+          onBlur={() => setTouched((prev) => ({ ...prev, phone: true }))}
           className="col-span-1 h-12 text-sm bg-gray-100 focus:bg-white"
         />
 
+        {/* Address */}
         <Input
           placeholder="Address Line 1 *"
           value={contact.address1}
@@ -199,6 +110,8 @@ export default function ContactInfoStep({
           onChange={(e) => setContact({ ...contact, address2: e.target.value })}
           className="col-span-1 h-12 text-sm bg-gray-100 focus:bg-white"
         />
+
+        {/* City & Subdivision */}
         <Input
           placeholder="City *"
           value={contact.city}
@@ -214,7 +127,7 @@ export default function ContactInfoStep({
           className="col-span-1 h-12 text-sm bg-gray-100 focus:bg-white"
         />
 
-        {/* Custom styled selects matching Input */}
+        {/* CityType & HOA dropdowns */}
         {renderDropdown(
           "City Limits or Unincorporated? *",
           contact.cityType,
@@ -231,10 +144,11 @@ export default function ContactInfoStep({
           () => setOpenIsHOA((o) => !o),
           (val) => setContact({ ...contact, isHOA: val })
         )}
-        {/* File upload styled like Input */}
+
+        {/* File Upload */}
         <label className="col-span-1 h-12 flex items-center justify-between px-3 bg-gray-100 border border-gray-200 rounded-lg cursor-pointer">
           <span className="text-sm text-gray-500">Upload Plat of Survey</span>
-          <ArrowUpTrayIcon className="size-4 text-gray-500" />
+          <ArrowUpTrayIcon className="w-5 h-5 text-gray-500" />
           <input
             type="file"
             className="hidden"
@@ -244,7 +158,7 @@ export default function ContactInfoStep({
           />
         </label>
 
-        {/* Fence Type custom dropdown */}
+        {/* Fence Type selection */}
         <div className="col-span-2">
           <div
             className="h-12 flex items-center justify-between px-3 bg-gray-100 border border-gray-200 rounded-lg cursor-pointer"
@@ -297,22 +211,72 @@ export default function ContactInfoStep({
           </AnimatePresence>
         </div>
 
-        {/* Comments textarea styled like Input */}
+        {/* Additional Comments */}
         <textarea
-          className="col-span-2 p-3 text-sm px-3 py-3 bg-gray-100 rounded-lg border border-gray-200 placeholder-gray-400 focus:bg-white focus:border-gray-300 h-32 resize-none"
+          className="col-span-2 p-3 text-sm bg-gray-100 rounded-lg border border-gray-200 placeholder-gray-400 focus:bg-white focus:border-gray-300 h-32 resize-none"
           placeholder="Additional Comments"
           value={contact.details || ""}
           onChange={(e) => setContact({ ...contact, details: e.target.value })}
         />
-        {phoneTouched && !phoneValid && (
+
+        {/* Validation messages */}
+        {!contact.firstName && (
+          <p className="col-span-2 text-red-500 text-sm">
+            First name is required.{" "}
+          </p>
+        )}
+
+        {!contact.lastName && (
+          <p className="col-span-2 text-red-500 text-sm">
+            Last name is required.{" "}
+          </p>
+        )}
+
+        {!fenceValid && (
+          <p className="col-span-2 text-red-500 text-sm">
+            Fence length must be more than 100ft.
+          </p>
+        )}
+
+        {!emailValid && (
+          <p className="col-span-2 text-red-500 text-sm">
+            Please enter a valid email address.
+          </p>
+        )}
+
+        {!phoneValid && (
           <p className="col-span-2 text-red-500 text-sm">
             Please enter a 10-digit phone number.
           </p>
         )}
 
-        {emailTouched && !emailValid && (
+        {!contact.address1 && (
           <p className="col-span-2 text-red-500 text-sm">
-            Please enter a valid email address.
+            Address Line 1 is required.
+          </p>
+        )}
+
+        {!contact.city && (
+          <p className="col-span-2 text-red-500 text-sm">
+            City is required.
+          </p>
+        )}
+
+        {!contact.cityType && (
+          <p className="col-span-2 text-red-500 text-sm">
+            Please select if you are in City Limits or Unincorporated.
+          </p>
+        )}
+
+        {!contact.isHOA && (
+          <p className="col-span-2 text-red-500 text-sm">
+            Please indicate if you are part of an HOA.
+          </p>
+        )}
+
+        {!contact.fenceType && (
+          <p className="col-span-2 text-red-500 text-sm">
+            Please select a fence type.
           </p>
         )}
       </form>
@@ -324,7 +288,7 @@ export default function ContactInfoStep({
           className="w-12 h-12 p-0 hover:bg-transparent focus:ring-0"
           onClick={back}
         >
-          <ArrowLeftCircleIcon className="size-7 text-gray-600" />
+          <ArrowLeftCircleIcon className="w-7 h-7 text-gray-600" />
         </Button>
         <Button
           variant="ghost"
@@ -332,7 +296,7 @@ export default function ContactInfoStep({
           onClick={next}
           disabled={!requiredFilled}
         >
-          <ArrowRightCircleIcon className="size-7 text-black" />
+          <ArrowRightCircleIcon className="w-7 h-7 text-black" />
         </Button>
       </div>
     </motion.div>
