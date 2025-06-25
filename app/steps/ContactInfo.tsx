@@ -42,6 +42,13 @@ export default function ContactInfoStep({
   const [openFence, setOpenFence] = useState(false);
   const [openCityType, setOpenCityType] = useState(false);
   const [openIsHOA, setOpenIsHOA] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
+
+  // Validation regex patterns
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email);
+  const phoneDigits = contact.phone.replace(/\D/g, "");
+  const phoneValid = /^\d{10}$/.test(phoneDigits);
 
   // validate required fields
   const requiredFilled =
@@ -59,6 +66,23 @@ export default function ContactInfoStep({
   const fenceOptions = ["White Vinyl", "Traditional Cedar", "Black Aluminum"];
   const cityTypeOptions = ["City Limits", "Unincorporated"];
   const hoaOptions = ["Yes", "No"];
+
+  // Phone formatting helper
+  const handlePhoneChange = (value: string) => {
+    let digits = value.replace(/\D/g, "").slice(0, 10);
+    let formatted = digits;
+    if (digits.length >= 7) {
+      formatted = `(${digits.substr(0, 3)})-${digits.substr(
+        3,
+        3
+      )}-${digits.substr(6)}`;
+    } else if (digits.length >= 4) {
+      formatted = `(${digits.substr(0, 3)})-${digits.substr(3)}`;
+    } else if (digits.length > 0) {
+      formatted = `(${digits}`;
+    }
+    setContact({ ...contact, phone: formatted });
+  };
 
   const renderDropdown = (
     label: string,
@@ -145,19 +169,24 @@ export default function ContactInfoStep({
           }
           className="col-span-1 h-12 text-sm bg-gray-100 focus:bg-white"
         />
+
         <Input
-          placeholder="Email *"
           type="email"
+          placeholder="Email *"
           value={contact.email}
           onChange={(e) => setContact({ ...contact, email: e.target.value })}
+          onBlur={() => setEmailTouched(true)}
           className="col-span-1 h-12 text-sm bg-gray-100 focus:bg-white"
         />
+
         <Input
           placeholder="Phone Number *"
           value={contact.phone}
-          onChange={(e) => setContact({ ...contact, phone: e.target.value })}
+          onChange={(e) => handlePhoneChange(e.target.value)}
+          onBlur={() => setPhoneTouched(true)}
           className="col-span-1 h-12 text-sm bg-gray-100 focus:bg-white"
         />
+
         <Input
           placeholder="Address Line 1 *"
           value={contact.address1}
@@ -275,6 +304,17 @@ export default function ContactInfoStep({
           value={contact.details || ""}
           onChange={(e) => setContact({ ...contact, details: e.target.value })}
         />
+        {phoneTouched && !phoneValid && (
+          <p className="col-span-2 text-red-500 text-sm">
+            Please enter a 10-digit phone number.
+          </p>
+        )}
+
+        {emailTouched && !emailValid && (
+          <p className="col-span-2 text-red-500 text-sm">
+            Please enter a valid email address.
+          </p>
+        )}
       </form>
 
       {/* Navigation buttons */}
