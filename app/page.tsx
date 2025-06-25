@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from "next/image";
 import ZipCodeStep from './steps/ZipCode'
-// import ContactInfoStep from './steps/ContactInfo'
+import ContactInfoStep from './steps/ContactInfo'
 // import TimeSelectionStep from './steps/TimeSelection'
 // import ConfirmationStep from './steps/Confirmation'
 
@@ -33,10 +33,10 @@ export default function EstimateScheduler() {
         {step === 0 && (
           <ZipCodeStep zipCode={zipCode} setZipCode={setZipCode} next={next} />
         )}
-        {/* {step === 1 && (
+        {step === 1 && (
           <ContactInfoStep contact={contact} setContact={setContact} next={next} back={back} />
         )}
-        {step === 2 && (
+        {/* {step === 2 && (
           <TimeSelectionStep selectedTime={selectedTime} setSelectedTime={setSelectedTime} next={next} back={back} />
         )}
         {step === 3 && (

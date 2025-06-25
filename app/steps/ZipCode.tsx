@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
-import Image from "next/image";
 
 interface Props {
   zipCode: string;
