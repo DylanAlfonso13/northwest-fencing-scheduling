@@ -1,9 +1,9 @@
-import { Contact } from './contact';
+import type { Dispatch, SetStateAction } from 'react';
+import type { Contact } from './contact';
 
-// --- Props Interface ---
 export interface Props {
   contact: Contact;
-  setContact: (c: Contact) => void;
+  setContact: Dispatch<SetStateAction<Contact>>;
   next: () => void;
   back: () => void;
 }

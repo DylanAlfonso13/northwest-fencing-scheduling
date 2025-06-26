@@ -20,7 +20,6 @@ export default function ContactInfoStep({
 }: Props) {
   // hook encapsulates formatters, validation, touched state
   const {
-    touched,
     setTouched,
     emailValid,
     phoneValid,
