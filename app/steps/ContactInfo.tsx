@@ -287,7 +287,7 @@ export default function ContactInfoStep({
           className="w-12 h-12 p-0 hover:bg-transparent focus:ring-0"
           onClick={back}
         >
-          <ArrowLeftCircleIcon className="w-7 h-7 text-gray-600" />
+          <ArrowLeftCircleIcon className="size-7 text-black" />
         </Button>
         <Button
           variant="ghost"
@@ -295,7 +295,7 @@ export default function ContactInfoStep({
           onClick={next}
           disabled={!requiredFilled}
         >
-          <ArrowRightCircleIcon className="w-7 h-7 text-black" />
+          <ArrowRightCircleIcon className="size-7 text-black" />
         </Button>
       </div>
     </motion.div>

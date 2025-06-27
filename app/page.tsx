@@ -1,38 +1,31 @@
-'use client'
-import { useState } from 'react'
-import { emptyContact } from '@/types/contact' 
+"use client";
+import { useState } from "react";
+import { emptyContact } from "@/types/contact";
 import Image from "next/image";
-import ZipCodeStep from './steps/ZipCode'
-import ContactInfoStep from './steps/ContactInfo'
+import ZipCodeStep from "./steps/ZipCode";
+import ContactInfoStep from "./steps/ContactInfo";
+import TimeSelectionStep from "./steps/TimeSelection";
 
 export default function EstimateScheduler() {
-  const [step, setStep] = useState(0)
-  const [zipCode, setZipCode] = useState('')
-  const [contact, setContact] = useState(emptyContact)
+  const [step, setStep] = useState(0);
+  const [zipCode, setZipCode] = useState("");
+  const [contact, setContact] = useState(emptyContact);
+  const [selectedTime, setSelectedTime] = useState("");
 
-  // const [selectedTime, setSelectedTime] = useState('')
-
-  const next = () => setStep(s => s + 1)
-  const back = () => setStep(s => s - 1)
+  const next = () => setStep((s) => s + 1);
+  const back = () => setStep((s) => s - 1);
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <main className="min-h-screen bg-gray-50 flex flex-col items-center px-4 pt-6">
       <div className="w-full">
-        <div className="p-6">
-          <Image
-            src="/logo.png"
-            alt="Northwest Cedar Logo"
-            width={120}
-            height={120}
-          />
-        </div>
-
+        <Image
+          src="/logo.png"
+          alt="Northwest Cedar Logo"
+          width={120}
+          height={120}
+        />
         {step === 0 && (
-          <ZipCodeStep
-            zipCode={zipCode}
-            setZipCode={setZipCode}
-            next={next}
-          />
+          <ZipCodeStep zipCode={zipCode} setZipCode={setZipCode} next={next} />
         )}
         {step === 1 && (
           <ContactInfoStep
@@ -42,7 +35,15 @@ export default function EstimateScheduler() {
             back={back}
           />
         )}
+        {step === 2 && (
+          <TimeSelectionStep
+            setSelectedTime={setSelectedTime}
+            next={next}
+            back={back}
+          />
+        )}
+        
       </div>
     </main>
-  )
+  );
 }
