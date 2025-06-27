@@ -233,7 +233,7 @@ export default function ContactInfoStep({
 
         {!fenceValid && (
           <p className="col-span-2 text-red-500 text-sm">
-            Fence length must be more than 100ft.
+            For estimates less than 100ft, please contact Freedom Fence: (630)-470-1846
           </p>
         )}
 
