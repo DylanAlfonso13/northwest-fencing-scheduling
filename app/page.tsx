@@ -5,6 +5,7 @@ import Image from "next/image";
 import ZipCodeStep from "./steps/ZipCode";
 import ContactInfoStep from "./steps/ContactInfo";
 import TimeSelectionStep from "./steps/TimeSelection";
+import ConfirmationStep from "./steps/Confirmation";
 
 export default function EstimateScheduler() {
   const [step, setStep] = useState(0);
@@ -42,7 +43,12 @@ export default function EstimateScheduler() {
             back={back}
           />
         )}
-        
+        {step === 3 && (
+          <ConfirmationStep
+            contact={contact}
+            selectedTime={selectedTime}
+          />
+        )}
       </div>
     </main>
   );
