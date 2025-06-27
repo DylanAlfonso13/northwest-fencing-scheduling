@@ -26,20 +26,27 @@ export default function ZipCodeStep({ zipCode, setZipCode, next }: Props) {
           To get started, enter your zip code
         </p>
         <div className="relative w-full max-w-lg">
-          <Input
-            placeholder="Zip Code"
-            value={zipCode}
-            onChange={(e) => setZipCode(e.target.value)}
-            className="pr-10 h-12 text-xl bg-gray-100 focus:bg-white"
-          />
-          <Button
-            variant={"ghost"}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 p-0 hover:bg-transparent focus:ring-0"
-            onClick={next}
-            disabled={!zipCode}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (zipCode) next();
+            }}
           >
-            <ArrowRightCircleIcon className="text-black size-7" />
-          </Button>
+            <Input
+              placeholder="Zip Code"
+              value={zipCode}
+              onChange={(e) => setZipCode(e.target.value)}
+              className="pr-10 h-12 text-xl bg-gray-100 focus:bg-white"
+            />
+            <Button
+              type="submit"
+              variant={"ghost"}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 p-0 hover:bg-transparent focus:ring-0"
+              disabled={!zipCode}
+            >
+              <ArrowRightCircleIcon className="text-black size-7" />
+            </Button>
+          </form>
         </div>
       </div>
     </motion.div>
